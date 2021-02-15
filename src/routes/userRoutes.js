@@ -7,23 +7,19 @@ const router = express.Router();
 
 router.post('/signup', authController.signUp);
 router.post('/login', authController.logIn);
-
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
-router.patch(
-  '/updatePassword',
-  authController.protect,
-  authController.updatePassword
-);
 
-router.patch('/updateMe', authController.protect, userController.updateMyData);
-router.get(
-  '/me',
-  authController.protect,
-  userController.getMe,
-  userController.getUser
-);
-router.delete('/deleteMe', authController.protect, userController.deleteMyData);
+// Following paths are all protected
+router.use(authController.protect);
+
+router.patch('/updatePassword', authController.updatePassword);
+router.patch('/updateMe', userController.updateMyData);
+router.delete('/deleteMe', userController.deleteMyData);
+router.get('/me', userController.getMe, userController.getUser);
+
+// Following paths are all restricted to admin
+router.use(authController.restrictTo('admin'));
 
 router
   .route('/')
