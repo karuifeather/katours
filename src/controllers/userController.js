@@ -1,7 +1,7 @@
 const User = require('./../models/userModel');
-const APIFeatures = require('./../utils/apiFeatures');
 const catchAsyncErrors = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
+const handle = require('./handlerFactory');
 
 const filterObj = (obj, ...options) => {
   const filteredObj = {};
@@ -10,18 +10,6 @@ const filterObj = (obj, ...options) => {
   });
   return filteredObj;
 };
-
-exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
-  const users = await User.find();
-
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
 
 exports.updateMyData = catchAsyncErrors(async (req, res, next) => {
   // 1. Create error if user POSTs password data
@@ -36,7 +24,8 @@ exports.updateMyData = catchAsyncErrors(async (req, res, next) => {
 
   // 2. Filteres fileds that are not allowed to update
   const filteredBody = filterObj(req.body, 'name', 'email');
-  // 2. Update user document
+
+  // 3. Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidators: true,
@@ -59,30 +48,16 @@ exports.deleteMyData = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!',
-  });
-};
+exports.getAllUsers = handle.getAll(User);
+exports.getUser = handle.getOne(User);
+// For admins
+// Do not update passwords using this
+exports.updateUser = handle.updateOne(User);
+exports.deleteUser = handle.deleteOne(User);
 
 exports.createUser = (req, res) => {
-  res.status(500).json({
+  res.status(404).json({
     status: 'error',
-    message: 'This route is not yet defined!',
-  });
-};
-
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!',
-  });
-};
-
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined!',
+    message: 'This route is not defined! Please use /signup instead.',
   });
 };

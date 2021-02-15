@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [6, 'A name must be atleast 6 characters long'],
     },
-    slug: String,
+    slug: { type: String, select: false },
     email: {
       type: String,
       required: [true, 'An email is required'],
