@@ -85,15 +85,19 @@ const tourSchema = new mongoose.Schema(
     secretTour: {
       type: Boolean,
       default: false,
+      select: false,
     },
     startLocation: {
       // GeoJson format to describe geo-spatial data
+      // in order to differentiate this special object from
+      // mongoDB schema options
+      // we'll need type and coordinates properties defined
       type: {
         type: String,
         default: 'Point',
         enum: ['Point'],
       },
-      // in MongoDB longitudes first, then latitudes
+      // in GeoJson longitudes first, then latitudes
       coordinates: [Number],
       address: String,
       description: String,
@@ -111,7 +115,7 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
-    // guides: Array, for embedding
+    // guides: Array //for embedding
     guides: [
       {
         type: mongoose.Schema.ObjectId,
@@ -131,6 +135,13 @@ const tourSchema = new mongoose.Schema(
 
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
+});
+
+// Virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
 });
 
 // Document save middlewares runs before .save() and .create() but not before .insertMany()
@@ -181,6 +192,7 @@ tourSchema.pre(/^find/, function (next) {
 // // Runs after the query is executed
 // tourSchema.post(/^find/, function (docs, next) {
 //   console.log(docs);
+//   console.log(`Query took ${Date.now() - this.start} ms.`);
 //   next();
 // });
 

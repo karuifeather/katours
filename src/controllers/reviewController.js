@@ -21,7 +21,7 @@ exports.getAllReviews = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-exports.addReview = catchAsyncErrors(async (req, res, next) => {
+exports.createReview = catchAsyncErrors(async (req, res, next) => {
   const review = await Review.create(req.body);
 
   res.status(200).json({
