@@ -43,7 +43,7 @@ exports.createOne = (Model) =>
     res.status(201).json({
       status: 'success',
       data: {
-        datat: doc,
+        data: doc,
       },
     });
   });
