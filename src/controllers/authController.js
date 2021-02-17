@@ -80,6 +80,8 @@ exports.protect = catchAsyncErrors(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -108,9 +110,56 @@ exports.protect = catchAsyncErrors(async (req, res, next) => {
   }
 
   // Grant access to the protected route
+  res.locals.user = currentUser;
   req.user = currentUser;
   next();
 });
+
+// ONLY FOR RENDERED PAGES SO NO ERRORS
+exports.isLoggedIn = async (req, res, next) => {
+  // Check for token
+  if (req.cookies.jwt) {
+    try {
+      // 2 Verification of token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_PRIVATE
+      );
+
+      // 3 Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+
+      // 4 Check if user changed password after token was issued
+      if (currentUser.changedPasswordAfterIssueing(decoded.iat)) {
+        return next();
+      }
+
+      // Conclusion: There is a logged in valid user
+      res.locals.user = currentUser;
+      return next();
+    } catch (e) {
+      return next();
+    }
+  }
+
+  next();
+};
+
+exports.logout = (req, res) => {
+  const cookieOptions = {
+    expires: new Date(Date.now() + 2 * 1000),
+    httpOnly: true,
+  };
+
+  res.cookie('jwt', 'loggedout', cookieOptions);
+
+  res.status(200).json({
+    status: 'success',
+  });
+};
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {

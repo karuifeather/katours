@@ -26,33 +26,61 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError('Your token has expired! Please log in again.', 401);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
+const sendErrorDev = (err, req, res) => {
+  // For API
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+
+  // FOR rendered site
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
     message: err.message,
-    stack: err.stack,
   });
 };
 
-const sendErrorProd = (err, res) => {
-  // Operational, trusted error: send message to client
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
+const sendErrorProd = (err, req, res) => {
+  // A. FOR API
+  if (req.originalUrl.startsWith('/api')) {
+    // Operational, trusted error: send message to client
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    }
+
     // Programming or other unknown error: don't leak error details to clients
-  } else {
-    // Log error
     console.error('Error', err);
 
     // Sends generic message
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Something went wrong... :(',
     });
   }
+
+  // B. For RENDERED Site
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong!',
+      message: err.message,
+    });
+  }
+
+  // Programming or other unknown error: don't leak error details to clients
+  console.error('Error', err);
+  // Sends generic message
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    message:
+      "No problem try again! You will, right? I'm sure you will. Go on! Do it!! Ganbare!!",
+  });
 };
 
 module.exports = (err, req, res, next) => {
@@ -60,9 +88,10 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
+    error.message = err.message;
 
     if (error.kind === 'ObjectId') {
       error = handleCastErrorInDB(error);
@@ -79,7 +108,7 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
     if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 
   next();

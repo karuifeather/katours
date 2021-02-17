@@ -13,6 +13,7 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 // Following paths are all protected
 router.use(authController.protect);
 
+router.get('/logout', authController.logout);
 router.patch('/updatePassword', authController.updatePassword);
 router.patch('/updateMe', userController.updateMyData);
 router.delete('/deleteMe', userController.deleteMyData);

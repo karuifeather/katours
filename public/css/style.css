@@ -607,7 +607,23 @@ body {
   overflow-x: scroll;
   -ms-scroll-snap-type: x mandatory;
   scroll-snap-type: x mandatory;
+  -webkit-scrollbar: { width: 0 }
 }
+
+.reviews::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* .reviews::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0); 
+  border-radius: 10px;
+}
+
+.reviews::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0); 
+} */
+
 .reviews__card {
   width: 30rem;
   padding: 4rem;
@@ -830,6 +846,7 @@ body {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  justify-content: flex-end;
 }
 .footer__nav li {
   margin-left: 1.5rem;
