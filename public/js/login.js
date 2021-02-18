@@ -34,7 +34,6 @@ export const logout = async () => {
       }, 5000);
     }
   } catch (e) {
-    console.log(e);
     showAlert('error', 'Something went wrong! Please try again.');
   }
 };

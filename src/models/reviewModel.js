@@ -93,7 +93,7 @@ reviewSchema.post(/^findOneAnd/, async function (doc, next) {
     next();
   }
   await doc.constructor.calcAvgRatings(doc.tour);
-  console.log(doc);
+
   next();
 });
 
