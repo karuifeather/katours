@@ -16,6 +16,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
+const bookingRouter = require('./routes/bookingRoutes');
 
 const app = express();
 
@@ -45,10 +46,11 @@ app.use(
         'img-src': ["'self'", 'data:'],
         'frame-ancestors': ["'self'"],
         'object-src': ["'none'"],
+        'frame-src': ['js.stripe.com'],
         'script-src': [
           "'self'",
           'api.mapbox.com',
-          'cdn.jsdelivr.net',
+          'js.stripe.com',
           (req, res) => `'nonce-${res.locals.cspNonce}'`,
         ],
         'connect-src': ["'self'", 'api.mapbox.com', 'events.mapbox.com'],
@@ -117,6 +119,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Cant't find ${req.originalUrl} on this server!`, 404));

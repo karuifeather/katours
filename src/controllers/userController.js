@@ -1,7 +1,60 @@
+const fs = require('fs');
+
+const multer = require('multer');
+const sharp = require('sharp');
+
 const User = require('./../models/userModel');
 const catchAsyncErrors = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const handle = require('./handlerFactory');
+
+// const multerStorage = multer.diskStorage({
+//   destination(req, file, cb) {
+//     // cb kinda works like next in express
+//     cb(null, 'public/img/users');
+//   },
+//   filename(req, file, cb) {
+//     // file = req.file that comes from multer middleware
+//     // user-{{user-id}}-{{timestamp}}.jpeg
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image. Please upload images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = catchAsyncErrors(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+  await fs.unlink(`public/img/users/${req.user.photo}`, (err) => {
+    if (err) next(new AppError('Upload failed. Please try again.'));
+  });
+
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 45 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+});
 
 const filterObj = (obj, ...options) => {
   const filteredObj = {};
@@ -29,6 +82,7 @@ exports.updateMyData = catchAsyncErrors(async (req, res, next) => {
 
   // 2. Filteres fileds that are not allowed to update
   const filteredBody = filterObj(req.body, 'name', 'email');
+  if (req.file) filteredBody.photo = req.file.filename;
 
   // 3. Update user document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
@@ -45,7 +99,14 @@ exports.updateMyData = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.deleteMyData = catchAsyncErrors(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user.id, { active: false });
+  await fs.unlink(`public/img/users/${req.user.photo}`, (err) => {
+    if (err) next(new AppError('Delete failed. Please try again.'));
+  });
+
+  await User.findByIdAndUpdate(req.user.id, {
+    active: false,
+    photo: 'default.jpg',
+  });
 
   res.status(204).json({
     status: 'success',

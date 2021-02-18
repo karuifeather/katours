@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema(
     photo: {
       type: String,
       trim: true,
+      default: 'default.jpg',
     },
     role: {
       type: String,
@@ -126,14 +127,14 @@ userSchema.methods.changedPasswordAfterIssueing = function (JWTTimestamp) {
 };
 
 userSchema.methods.createPasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(36).toString('hex');
+  const resetToken = crypto.randomBytes(18).toString('hex');
 
   this.passwordResetToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
 
-  this.passwordResetExpiresIn = Date.now() + 15 * 60 * 1000; // 15 mins
+  this.passwordResetExpiresIn = Date.now() + 30 * 60 * 1000; // 30 mins
 
   return resetToken;
 };

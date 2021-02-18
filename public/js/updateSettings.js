@@ -11,7 +11,10 @@ export const updateData = async (data, type) => {
     });
 
     if (res.data.status === 'success') {
-      showAlert('success', `${type.toUpperCase()} updated successfully!`);
+      showAlert(
+        'success',
+        `${type.toUpperCase()} updated! You might need to reload the page to see the changes.`
+      );
     }
   } catch (e) {
     showAlert('error', e.response.data.message);

@@ -5,6 +5,7 @@ import '@babel/polyfill';
 import { login, logout } from './login';
 import { updateData } from './updateSettings';
 import { displayMap } from './mapbox';
+import { bookTour } from './stripe';
 
 // DOM Elements
 const $mapbox = document.getElementById('map');
@@ -16,6 +17,8 @@ const $updateMyPassword = document.querySelector('.form-user-password');
 const $passwordCurrent = document.getElementById('password-current');
 const $password = document.getElementById('password');
 const $passwordConfirm = document.getElementById('password-confirm');
+
+const $bookTour = document.getElementById('book-tour');
 
 // Values
 
@@ -42,13 +45,17 @@ if ($logoutButton) {
 }
 
 if ($updateMyData) {
-  $updateMyData.addEventListener('submit', (e) => {
+  $updateMyData.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById('email').value;
-    const name = document.getElementById('name').value;
+    const form = new FormData();
+    form.append('email', document.getElementById('email').value);
+    form.append('name', document.getElementById('name').value);
+    form.append('photo', document.getElementById('photo').files[0]);
 
-    updateData({ email, name }, 'data');
+    document.querySelector('.btn-save-data').innerHTML = 'Updating...';
+    updateData(form, 'data');
+    document.querySelector('.btn-save-data').innerHTML = 'Save settings';
   });
 }
 
@@ -70,5 +77,14 @@ if ($updateMyPassword) {
     $passwordCurrent.value = '';
     $password.value = '';
     $passwordConfirm.value = '';
+  });
+}
+
+if ($bookTour) {
+  $bookTour.addEventListener('click', (e) => {
+    const { tourId } = e.target.dataset;
+
+    e.target.textContent = 'Processing...';
+    bookTour(tourId);
   });
 }
