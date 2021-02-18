@@ -28,8 +28,11 @@ app.set('views', path.join(__dirname, 'views'));
 /**********************************
  * GLOBAL MIDDLEWARES
  * ********************************/
-// Implement cors
+// Implement cors for simple requests
 app.use(cors());
+
+// Implement cors for complex requests for OPTION req in preflight phase
+app.options('*', cors());
 
 // Serving static files
 app.use(express.static(path.join(__dirname, '../public')));
