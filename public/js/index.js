@@ -37,18 +37,20 @@ if ($mapbox) {
 }
 
 if ($loginForm) {
-  $loginForm.addEventListener('submit', (e) => {
+  $loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    login(email, password);
+    document.getElementById('btn-login').innerHTML = 'Loggin in...';
+    await login(email, password);
+    document.getElementById('btn-login').innerHTML = 'All done';
   });
 }
 
 if ($signupForm) {
-  $signupForm.addEventListener('submit', (e) => {
+  $signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const name = document.getElementById('name').value;
@@ -59,7 +61,9 @@ if ($signupForm) {
     if (password !== passwordConfirm)
       return showAlert('error', 'Passwords must match.');
 
-    signup({ name, email, password, passwordConfirm });
+    document.getElementById('btn-signup').innerHTML = 'Creating...';
+    await signup({ name, email, password, passwordConfirm });
+    document.getElementById('btn-signup').innerHTML = 'All done';
   });
 }
 
