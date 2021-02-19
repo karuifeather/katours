@@ -37,3 +37,23 @@ export const logout = async () => {
     showAlert('error', 'Something went wrong! Please try again.');
   }
 };
+
+export const signup = async (data) => {
+  try {
+    const res = await axios({
+      method: 'POST',
+      url: '/api/v1/users/signup',
+      data,
+    });
+
+    if (res.data.status === 'success') {
+      showAlert('success', 'Check your mail to completed the registration.');
+      window.setTimeout(() => {
+        location.assign('/overview');
+      }, 1500);
+    }
+  } catch (e) {
+    console.log(e);
+    showAlert('error', 'Something went wrong! Please try again.');
+  }
+};

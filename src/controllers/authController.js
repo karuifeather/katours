@@ -47,15 +47,65 @@ exports.signUp = catchAsyncErrors(async (req, res, next) => {
     passwordConfirm: req.body.passwordConfirm,
   });
 
-  const url = `${req.protocol}://${req.get('host')}/me`;
+  // 2 Generate the random confirm token
+  const confrimToken = newUser.createConfirmToken();
+  await newUser.save({ validateBeforeSave: false });
+
+  // 3 Send it to user's email
+  const confrimTokenUrl = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/users/confirmEmail/${confrimToken}`;
+
   await new Email(
-    { name: req.body.name, email: req.body.email },
-    url
-  ).sendWelcomeEmail();
+    { name: newUser.name, email: newUser.email },
+    confrimTokenUrl
+  ).sendConfirmEmail();
 
   newUser.active = undefined;
 
   createSendToken(newUser, 201, res);
+});
+
+exports.confirmEmail = catchAsyncErrors(async (req, res, next) => {
+  // 1 Get user based on the token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
+
+  const newUser = await User.findOne({
+    accountConfirmToken: hashedToken,
+  });
+
+  if (!newUser)
+    return res.status(400).render('alert', {
+      alertMessage:
+        'Either the token is invalid or your account has already been verified!',
+      alertType: 'error',
+      title: 'Verification failed',
+      user: {},
+    });
+
+  // 2 Prepare to welcome the newUser
+  newUser.accountConfirmToken = undefined;
+  newUser.accountExpiresIn = undefined;
+  await newUser.save({ validateBeforeSave: false });
+
+  // 3 Send welcome email
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  await new Email(
+    { name: newUser.name, email: newUser.email },
+    url
+  ).sendWelcomeEmail();
+
+  //So that the confirmation notification does not show if the request was mde from same browser
+
+  res.status(200).render('alert', {
+    alertMessage: 'Your account has been successfully verified!',
+    alertType: 'success',
+    title: 'Email Confirmation',
+    user: {},
+  });
 });
 
 exports.logIn = catchAsyncErrors(async (req, res, next) => {

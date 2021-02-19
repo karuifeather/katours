@@ -1,10 +1,17 @@
 header.header
+    if (user && user.accountConfirmToken)
+        .alert.alert--success(style='position: absolute; bottom: 0; text-align: none; padding: 1.6rem 1.7rem;')
+            #close-error x 
+            |Check your inbox to see confirmation email. Didn't get it?
+            | 
+            a.nav__el(href="/", style='border-bottom: 1px solid #fff;') Send again
+            p If this message does not go away after a reload, you need to try again.
     nav.nav.nav--tours 
         a.nav__el(href='/overview') All tours
     .header__logo
         img(src='/img/logo-white.png' alt='Natours logo')
     nav.nav.nav--user
-        if user
+        if (user && user.name)
             a.nav__el.nav__el--logout Logout
             a.nav__el(href="/me")
                 img.nav__user-img(src=`/img/users/${user.photo}` alt=`${user.name}`)

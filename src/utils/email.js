@@ -66,8 +66,11 @@ module.exports = class Email {
   async sendResetTokenEmail() {
     await this.send(
       'passwordReset',
-      'Reset password instructions for your Natours account',
-      'operation'
+      'Reset password instructions for your Natours account'
     );
+  }
+
+  async sendConfirmEmail() {
+    await this.send('emailConfirm', 'Confirm your Natours Account');
   }
 };

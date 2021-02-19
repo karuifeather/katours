@@ -52,6 +52,8 @@ const userSchema = new mongoose.Schema(
       },
     },
     passwordChangedAt: Date,
+    accountConfirmToken: String,
+    accountExpiresIn: Date,
     passwordResetToken: String,
     passwordResetExpiresIn: Date,
     active: {
@@ -134,9 +136,24 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
 
-  this.passwordResetExpiresIn = Date.now() + 30 * 60 * 1000; // 30 mins
+  this.passwordResetExpiresIn = Date.now() + 15 * 60 * 1000; // 15 mins
 
   return resetToken;
+};
+
+userSchema.methods.createConfirmToken = function () {
+  const confirmToken = crypto.randomBytes(18).toString('hex');
+
+  this.accountConfirmToken = crypto
+    .createHash('sha256')
+    .update(confirmToken)
+    .digest('hex');
+
+  this.accountExpiresIn = Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days from this fn call
+
+  console.log('Entered createConfirmToken');
+
+  return confirmToken;
 };
 
 const User = new mongoose.model('User', userSchema);

@@ -1,0 +1,22 @@
+extend baseEmail 
+
+block content 
+    p Hello, #{firstName}!
+     
+    p You're on your way!
+    p Let's confirm your email address.
+    p By clicking on the following link, you are confirming your email address.
+        table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
+            tbody
+                tr
+                    td(align='left')
+                        table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+                            tbody
+                                tr
+                                    td
+                                        a(href=`${url}`, target='_blank') Confirm Email Address
+    p
+        em 
+            bold Note: 
+            |If you did not sign up for this account, you can ingnore this email and the account will be deleted winthin 60 days.
+

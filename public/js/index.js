@@ -2,14 +2,17 @@ __webpack_nonce__ = window.NONCE_ID;
 
 import '@babel/polyfill';
 
-import { login, logout } from './login';
+import { login, logout, signup } from './auth';
 import { updateData } from './updateSettings';
 import { displayMap } from './mapbox';
 import { bookTour } from './stripe';
+import { showAlert, hideAlert } from './alerts';
 
 // DOM Elements
+const $closeAlert = document.getElementById('close-error');
 const $mapbox = document.getElementById('map');
 const $loginForm = document.querySelector('.form--login');
+const $signupForm = document.querySelector('.form--signup');
 const $logoutButton = document.querySelector('.nav__el--logout');
 const $updateMyData = document.querySelector('.form-user-data');
 
@@ -23,6 +26,10 @@ const $bookTour = document.getElementById('book-tour');
 // Values
 
 // Delegation
+if ($closeAlert) {
+  $closeAlert.addEventListener('click', hideAlert);
+}
+
 if ($mapbox) {
   const locations = JSON.parse($mapbox.dataset.locations);
 
@@ -37,6 +44,22 @@ if ($loginForm) {
     const password = document.getElementById('password').value;
 
     login(email, password);
+  });
+}
+
+if ($signupForm) {
+  $signupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password-confirm').value;
+
+    if (password !== passwordConfirm)
+      return showAlert('error', 'Passwords must match.');
+
+    signup({ name, email, password, passwordConfirm });
   });
 }
 
