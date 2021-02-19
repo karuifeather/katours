@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/me', authController.protect, viewController.getAccount);
 
-router.use(authController.isLoggedIn);
+router.use(viewController.alert, authController.isLoggedIn);
 
 router.get(
   '/overview',

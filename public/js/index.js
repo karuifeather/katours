@@ -115,3 +115,7 @@ if ($bookTour) {
     bookTour(tourId);
   });
 }
+
+const alert = document.querySelector('body').dataset.alert;
+
+if (alert) showAlert('success', alert, 20);
