@@ -98,7 +98,9 @@ exports.confirmEmail = catchAsyncErrors(async (req, res, next) => {
     url
   ).sendWelcomeEmail();
 
-  //So that the confirmation notification does not show if the request was mde from same browser
+  // For some unknown reason, current user was assigned to res.locals
+  // and was causing rendering bugs so to solve it, I manually supplied
+  // empty user object in render options
 
   res.status(200).render('alert', {
     alertMessage: 'Your account has been successfully verified!',
