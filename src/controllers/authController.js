@@ -13,22 +13,19 @@ const signToken = (id) => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
-  const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
 
   // Remove password from the object
   user.password = undefined;
 
-  if (process.env.NODE_ENV === 'production') {
-    cookieOptions.secure = true;
-  }
-  res.cookie('jwt', token, cookieOptions);
+  res.cookie('jwt', token, {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+  });
 
   res.status(statusCode).json({
     status: 'success',
@@ -63,7 +60,7 @@ exports.signUp = catchAsyncErrors(async (req, res, next) => {
 
   newUser.active = undefined;
 
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 exports.confirmEmail = catchAsyncErrors(async (req, res, next) => {
@@ -127,7 +124,7 @@ exports.logIn = catchAsyncErrors(async (req, res, next) => {
   }
 
   // 3 If everything is ok, send token to client
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.protect = catchAsyncErrors(async (req, res, next) => {
@@ -297,7 +294,7 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
   // Done by middleware. See userModel.js
 
   // 4 Log the user in and send JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
@@ -319,5 +316,5 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
   await user.save();
 
   // 4. log user in, send JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
