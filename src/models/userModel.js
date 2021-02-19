@@ -61,16 +61,22 @@ const userSchema = new mongoose.Schema(
       default: true,
       select: false,
     },
+  },
+  {
+    toObject: {
+      virtuals: true,
+    },
+    toJSON: {
+      virtuals: true,
+    },
   }
-  //   {
-  //     toObject: {
-  //       virtuals: true,
-  //     },
-  //     toJSON: {
-  //       virtuals: true,
-  //     },
-  //   }
 );
+
+userSchema.virtual('bookings', {
+  ref: 'Booking',
+  foreignField: 'user',
+  localField: '_id',
+});
 
 userSchema.pre('save', async function (next) {
   // Run the function if password was changed
@@ -99,7 +105,7 @@ userSchema.pre('save', function (next) {
 
 userSchema.pre(/^find/, function (next) {
   // this points to the current query
-  this.find({ active: { $ne: false } });
+  this.find({ active: { $ne: false } }).populate('bookings');
   // .select('-__v -passwordChangedAt -slug');
   next();
 });
