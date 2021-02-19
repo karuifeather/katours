@@ -47,7 +47,10 @@ export const signup = async (data) => {
     });
 
     if (res.data.status === 'success') {
-      showAlert('success', 'Check your mail to completed the registration.');
+      showAlert(
+        'success',
+        'Your account has been created. Check your mail to verify it.'
+      );
       window.setTimeout(() => {
         location.assign('/overview');
       }, 1500);
