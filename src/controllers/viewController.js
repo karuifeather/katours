@@ -36,19 +36,9 @@ exports.getTour = catchAsyncErrors(async (req, res, next) => {
     return next(new AppError('There is no tour with that name.', 404));
   }
 
-  const userBookings = res.locals.user.bookings.map(
-    (booking) => booking.tour.id
-  );
-  let isItBooked = false;
-
-  if (userBookings.length !== 0) {
-    isItBooked = userBookings.includes(tour.id);
-  }
-
   res.status(200).render('tour', {
     title: `${tour.name} Tour`,
     tour,
-    isItBooked,
   });
 });
 
