@@ -49,11 +49,11 @@ exports.getCheckoutSession = catchAsyncErrors(async (req, res, next) => {
 
 const createBookingCheckout = async (sessionData) => {
   const tour = sessionData.client_reference_id;
-  const user = (await User.find({ email: sessionData.customer_details.email }))
-    .id;
+  const user = await User.find({ email: sessionData.customer_details.email });
+  const userId = user.id;
   const price = sessionData.amount_total / 100;
 
-  await Booking.create({ tour, user, price });
+  await Booking.create({ tour, user: userId, price });
 };
 
 exports.webhookCheckout = (req, res, next) => {
@@ -77,7 +77,7 @@ exports.webhookCheckout = (req, res, next) => {
     createBookingCheckout(event.data.object);
   }
 
-  res.status(200).json({ received: true, eventType: event.type });
+  res.status(200).json({ received: true, event });
 };
 
 // exports.createBookingCheckout = catchAsyncErrors(async (req, res, next) => {
