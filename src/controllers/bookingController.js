@@ -54,6 +54,7 @@ const createBookingCheckout = async (sessionData) => {
   const price = sessionData.amount_total / 100;
 
   await Booking.create({ tour, user: userId, price });
+  console.log('BOOKING CREATED!!');
 };
 
 exports.webhookCheckout = (req, res, next) => {
@@ -74,6 +75,7 @@ exports.webhookCheckout = (req, res, next) => {
   }
 
   if (event.type === 'checkout.session.completed') {
+    console.log('BOOKING CREATING!!!!!');
     createBookingCheckout(event.data.object);
   }
 
