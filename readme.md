@@ -1,6 +1,6 @@
 # Natours
 
-[![](https://katours.herokuapp.com/)](https://katours.herokuapp.com/)
+![Natours Logo](https://katours.herokuapp.com/img/home/logo-green-1x.png 'Natours')
 
 Built using Node, Express and MongoDb
 
