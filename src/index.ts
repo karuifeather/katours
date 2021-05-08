@@ -17,6 +17,7 @@ class KatoursAPI extends Server {
 
   private setupControllers() {
     const test = new Test();
+
     super.addControllers(test);
   }
 
