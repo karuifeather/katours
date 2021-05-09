@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 
 import { Tour } from './tourModel';
+import { ReviewDocument, ReviewModel } from './types';
 
-const ReviewSchema = new mongoose.Schema(
+const ReviewSchema = new mongoose.Schema<ReviewDocument, ReviewModel>(
   {
     review: {
       type: String,
@@ -81,7 +82,7 @@ ReviewSchema.statics.calcAvgRatings = async function (tourId) {
   }
 };
 
-ReviewSchema.post('save', function () {
+ReviewSchema.post<ReviewDocument>('save', function () {
   // this points to the current doc
   // @ts-ignore
   this.constructor.calcAvgRatings(this.tour);
@@ -98,4 +99,7 @@ ReviewSchema.post(/^findOneAnd/, async function (doc, next) {
   next();
 });
 
-export const Review = mongoose.model('Review', ReviewSchema);
+export const Review = mongoose.model<ReviewDocument, ReviewModel>(
+  'Review',
+  ReviewSchema
+);

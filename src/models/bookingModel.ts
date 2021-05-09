@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import { BookingDocument, BookingModel } from './types';
 
-const BookingSchema = new mongoose.Schema({
+const BookingSchema = new mongoose.Schema<BookingDocument, BookingModel>({
   tour: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tour',
@@ -38,4 +39,7 @@ BookingSchema.pre(/^find/, function (next) {
   next();
 });
 
-export const Booking = mongoose.model('Booking', BookingSchema);
+export const Booking = mongoose.model<BookingDocument, BookingModel>(
+  'Booking',
+  BookingSchema
+);

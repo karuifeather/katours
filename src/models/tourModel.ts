@@ -1,9 +1,9 @@
 import mongoose, { Query } from 'mongoose';
 import slugify from 'slugify';
 
-import { TourDocument } from './types';
+import { TourDocument, TourModel } from './types';
 
-const TourSchema = new mongoose.Schema<TourDocument>(
+const TourSchema = new mongoose.Schema<TourDocument, TourModel>(
   {
     name: {
       type: String,
@@ -212,4 +212,4 @@ TourSchema.pre(/^find/, function (next) {
 //   next();
 // });
 
-export const Tour = mongoose.model('Tour', TourSchema);
+export const Tour = mongoose.model<TourDocument, TourModel>('Tour', TourSchema);

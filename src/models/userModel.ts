@@ -4,9 +4,9 @@ import slugify from 'slugify';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 
-import { UserDocument } from './types';
+import { UserDocument, UserModel } from './types';
 
-const UserSchema = new mongoose.Schema<UserDocument>(
+const UserSchema = new mongoose.Schema<UserDocument, UserModel>(
   {
     name: {
       type: String,
@@ -164,9 +164,7 @@ UserSchema.methods.createConfirmToken = function () {
 
   this.accountExpiresIn = Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days from this fn call
 
-  console.log('Entered createConfirmToken');
-
   return confirmToken;
 };
 
-export const User = mongoose.model('User', UserSchema);
+export const User = mongoose.model<UserDocument, UserModel>('User', UserSchema);
