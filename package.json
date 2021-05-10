@@ -7,7 +7,7 @@
     "start": "node build/server.js",
     "build": "tsc",
     "dev": "nodemon",
-    "postbuild": "yarn build"
+    "postinstall": "yarn build"
   },
   "author": "mE",
   "license": "ISC",
