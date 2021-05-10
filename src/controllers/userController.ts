@@ -44,7 +44,7 @@ export const resizeUserPhoto = catchAsync(async (req, res, next) => {
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
   await fs.unlink(`public/img/users/${req.user.photo}`, (err) => {
-    if (err) next(new AppError('Upload failed. Please try again.', 500));
+    if (err) return next(new AppError('Upload failed. Please try again.', 500));
   });
 
   await sharp(req.file.buffer)
