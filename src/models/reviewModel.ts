@@ -1,8 +1,9 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const Tour = require('./tourModel');
+import { Tour } from './tourModel';
+import { ReviewDocument, ReviewModel } from './types';
 
-const reviewSchema = new mongoose.Schema(
+const ReviewSchema = new mongoose.Schema<ReviewDocument, ReviewModel>(
   {
     review: {
       type: String,
@@ -20,12 +21,12 @@ const reviewSchema = new mongoose.Schema(
       default: Date.now,
     },
     tour: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Tour',
       required: [true, 'Review must belong to a tour.'],
     },
     user: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Review must belong to a user.'],
     },
@@ -36,9 +37,9 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+ReviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
-reviewSchema.pre(/^find/, function (next) {
+ReviewSchema.pre(/^find/, function (next) {
   // this.populate({
   //   path: 'tour',
   //   select: 'name',
@@ -53,7 +54,7 @@ reviewSchema.pre(/^find/, function (next) {
   next();
 });
 
-reviewSchema.statics.calcAvgRatings = async function (tourId) {
+ReviewSchema.statics.calcAvgRatings = async function (tourId) {
   const stats = await this.aggregate([
     {
       $match: { tour: tourId },
@@ -81,14 +82,15 @@ reviewSchema.statics.calcAvgRatings = async function (tourId) {
   }
 };
 
-reviewSchema.post('save', function () {
+ReviewSchema.post<ReviewDocument>('save', function () {
   // this points to the current doc
+  // @ts-ignore
   this.constructor.calcAvgRatings(this.tour);
 });
 
 // findByIdAndUpdate
 // findbyIdAndDelete
-reviewSchema.post(/^findOneAnd/, async function (doc, next) {
+ReviewSchema.post(/^findOneAnd/, async function (doc, next) {
   if (!doc) {
     next();
   }
@@ -97,6 +99,7 @@ reviewSchema.post(/^findOneAnd/, async function (doc, next) {
   next();
 });
 
-const Review = mongoose.model('Review', reviewSchema);
-
-module.exports = Review;
+export const Review = mongoose.model<ReviewDocument, ReviewModel>(
+  'Review',
+  ReviewSchema
+);

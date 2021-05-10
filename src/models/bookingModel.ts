@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { BookingDocument, BookingModel } from './types';
 
-const bookingSchema = new mongoose.Schema({
+const BookingSchema = new mongoose.Schema<BookingDocument, BookingModel>({
   tour: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Tour',
     required: [true, 'A booking must have a tour.'],
   },
   user: {
-    type: mongoose.Schema.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'A booking must belong to a user.'],
   },
@@ -27,7 +28,7 @@ const bookingSchema = new mongoose.Schema({
 
 // bookingSchema.index({ tour: 1, user: 1 }, { unique: true });
 
-bookingSchema.pre(/^find/, function (next) {
+BookingSchema.pre(/^find/, function (next) {
   // this.populate('user').
 
   this.populate({
@@ -38,6 +39,7 @@ bookingSchema.pre(/^find/, function (next) {
   next();
 });
 
-const Booking = mongoose.model('Booking', bookingSchema);
-
-module.exports = Booking;
+export const Booking = mongoose.model<BookingDocument, BookingModel>(
+  'Booking',
+  BookingSchema
+);

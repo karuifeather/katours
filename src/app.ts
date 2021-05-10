@@ -1,25 +1,25 @@
-const path = require('path');
-const crypto = require('crypto');
+import path from 'path';
+import crypto from 'crypto';
 
-const express = require('express');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
-const hpp = require('hpp');
-const cookieParser = require('cookie-parser');
-const compression = require('compression');
-const cors = require('cors');
+import express from 'express';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
+import hpp from 'hpp';
+import cookieParser from 'cookie-parser';
+import compression from 'compression';
+import cors from 'cors';
 
-const AppError = require('./utils/appError');
-const globalErrorHandler = require('./controllers/errorController');
-const bookingController = require('./controllers/bookingController');
-const tourRouter = require('./routes/tourRoutes');
-const userRouter = require('./routes/userRoutes');
-const reviewRouter = require('./routes/reviewRoutes');
-const viewRouter = require('./routes/viewRoutes');
-const bookingRouter = require('./routes/bookingRoutes');
+import { AppError } from './utils/appError';
+import { globalErrorHandler } from './controllers/errorController';
+import { webhookCheckout } from './controllers/bookingController';
+import { router as tourRouter } from './routes/tourRoutes';
+import { router as userRouter } from './routes/userRoutes';
+import { router as reviewRouter } from './routes/reviewRoutes';
+import { router as viewRouter } from './routes/viewRoutes';
+import { router as bookingRouter } from './routes/bookingRoutes';
 
 const app = express();
 
@@ -74,6 +74,7 @@ app.use(
 );
 
 // Development logging
+console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -89,7 +90,7 @@ app.use('/api', limiter);
 app.post(
   '/webhook-checkout',
   express.raw({ type: 'application/json' }),
-  bookingController.webhookCheckout
+  webhookCheckout
 );
 
 // Body parser, reading data from body into req.body
@@ -120,12 +121,6 @@ app.use(
 
 app.use(compression());
 
-// app.get('/api/v1/tours', getAllTours);
-// app.get('/api/v1/tours/:id', getTour);
-// app.post('/api/v1/tours', createTour);
-// app.patch('/api/v1/tours/:id', updateTour);
-// app.delete('/api/v1/tours/:id', deleteTour);
-
 // Routes
 app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
@@ -139,4 +134,4 @@ app.all('*', (req, res, next) => {
 
 app.use(globalErrorHandler);
 
-module.exports = app;
+export { app };
