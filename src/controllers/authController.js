@@ -53,10 +53,12 @@ exports.signUp = catchAsyncErrors(async (req, res, next) => {
     'host'
   )}/api/v1/users/confirmEmail/${confrimToken}`;
 
-  await new Email(
-    { name: newUser.name, email: newUser.email },
-    confrimTokenUrl
-  ).sendConfirmEmail();
+  /*lost sendgrid account*/
+
+  // await new Email(
+  //   { name: newUser.name, email: newUser.email },
+  //   confrimTokenUrl
+  // ).sendConfirmEmail();
 
   newUser.active = undefined;
 
@@ -86,14 +88,16 @@ exports.confirmEmail = catchAsyncErrors(async (req, res, next) => {
   // 2 Prepare to welcome the newUser
   newUser.accountConfirmToken = undefined;
   newUser.accountExpiresIn = undefined;
+  newUser.active = true;
+
   await newUser.save({ validateBeforeSave: false });
 
   // 3 Send welcome email
-  const url = `${req.protocol}://${req.get('host')}/me`;
-  await new Email(
-    { name: newUser.name, email: newUser.email },
-    url
-  ).sendWelcomeEmail();
+  // const url = `${req.protocol}://${req.get('host')}/me`;
+  // await new Email(
+  //   { name: newUser.name, email: newUser.email },
+  //   url
+  // ).sendWelcomeEmail();
 
   // For some unknown reason, current user was assigned to res.locals
   // and was causing rendering bugs so to solve it, I manually supplied

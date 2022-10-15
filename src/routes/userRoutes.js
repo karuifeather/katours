@@ -5,6 +5,7 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
+// TODO: fix sendgrid
 router.post('/signup', authController.signUp);
 router.get('/confirmEmail/:token', authController.confirmEmail);
 router.post('/login', authController.logIn);
