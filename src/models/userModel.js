@@ -157,8 +157,6 @@ userSchema.methods.createConfirmToken = function () {
 
   this.accountExpiresIn = Date.now() + 60 * 24 * 60 * 60 * 1000; // 60 days from this fn call
 
-  console.log('Entered createConfirmToken');
-
   return confirmToken;
 };
 
