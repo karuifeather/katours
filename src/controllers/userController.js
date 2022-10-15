@@ -1,12 +1,12 @@
-import fs from 'fs';
+const fs = require('fs');
 
-import multer from 'multer';
-import sharp from 'sharp';
+const multer = require('multer');
+const sharp = require('sharp');
 
-import { User } from '../models/userModel';
-import { catchAsync } from '../utils/catchAsync';
-import { AppError } from '../utils/appError';
-import { getOne, getAll, updateOne, deleteOne } from './handlerFactory';
+const User = require('./../models/userModel');
+const catchAsyncErrors = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
+const handle = require('./handlerFactory');
 
 // const multerStorage = multer.diskStorage({
 //   destination(req, file, cb) {
@@ -36,15 +36,15 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
-export const uploadUserPhoto = upload.single('photo');
+exports.uploadUserPhoto = upload.single('photo');
 
-export const resizeUserPhoto = catchAsync(async (req, res, next) => {
+exports.resizeUserPhoto = catchAsyncErrors(async (req, res, next) => {
   if (!req.file) return next();
 
   req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
 
   await fs.unlink(`public/img/users/${req.user.photo}`, (err) => {
-    if (err) return next(new AppError('Upload failed. Please try again.', 500));
+    if (err) next(new AppError('Upload failed. Please try again.'));
   });
 
   await sharp(req.file.buffer)
@@ -64,12 +64,12 @@ const filterObj = (obj, ...options) => {
   return filteredObj;
 };
 
-export const getMe = (req, res, next) => {
+exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();
 };
 
-export const updateMyData = catchAsync(async (req, res, next) => {
+exports.updateMyData = catchAsyncErrors(async (req, res, next) => {
   // 1. Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
     return next(
@@ -82,7 +82,6 @@ export const updateMyData = catchAsync(async (req, res, next) => {
 
   // 2. Filteres fileds that are not allowed to update
   const filteredBody = filterObj(req.body, 'name', 'email');
-  // @ts-ignore
   if (req.file) filteredBody.photo = req.file.filename;
 
   // 3. Update user document
@@ -99,9 +98,9 @@ export const updateMyData = catchAsync(async (req, res, next) => {
   });
 });
 
-export const deleteMyData = catchAsync(async (req, res, next) => {
+exports.deleteMyData = catchAsyncErrors(async (req, res, next) => {
   await fs.unlink(`public/img/users/${req.user.photo}`, (err) => {
-    if (err) next(new AppError('Delete failed. Please try again.', 500));
+    if (err) next(new AppError('Delete failed. Please try again.'));
   });
 
   await User.findByIdAndUpdate(req.user.id, {
@@ -115,14 +114,14 @@ export const deleteMyData = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getAllUsers = getAll(User);
-export const getUser = getOne(User);
+exports.getAllUsers = handle.getAll(User);
+exports.getUser = handle.getOne(User);
 // For admins
 // Do not update passwords using this
-export const updateUser = updateOne(User);
-export const deleteUser = deleteOne(User);
+exports.updateUser = handle.updateOne(User);
+exports.deleteUser = handle.deleteOne(User);
 
-export const createUser = (req, res) => {
+exports.createUser = (req, res) => {
   res.status(404).json({
     status: 'error',
     message: 'This route is not defined! Please use /signup instead.',

@@ -1,29 +1,18 @@
-import Stripe from 'stripe';
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 
-import { Tour } from '../models/tourModel';
-import { User } from '../models/userModel';
-import { Booking } from '../models/bookingModel';
-import { catchAsync } from '../utils/catchAsync';
-import {
-  createOne,
-  deleteOne,
-  getAll,
-  getOne,
-  updateOne,
-} from './handlerFactory';
+const Tour = require('./../models/tourModel');
+const User = require('./../models/userModel');
+const Booking = require('./../models/bookingModel');
+const catchAsyncErrors = require('./../utils/catchAsync');
+const handle = require('./handlerFactory');
 
-export const getBooking = getOne(Booking);
-export const getBookings = getAll(Booking);
-export const deleteBooking = deleteOne(Booking);
-export const createBooking = createOne(Booking);
-export const updateBooking = updateOne(Booking);
+exports.getBooking = handle.getOne(Booking);
+exports.getBookings = handle.getAll(Booking);
+exports.deleteBooking = handle.deleteOne(Booking);
+exports.createBooking = handle.createOne(Booking);
+exports.updateBooking = handle.updateOne(Booking);
 
-const stripe = new Stripe(process.env.STRIPE_SECRET, {
-  apiVersion: '2020-08-27',
-  typescript: true,
-});
-
-export const getCheckoutSession = catchAsync(async (req, res, next) => {
+exports.getCheckoutSession = catchAsyncErrors(async (req, res, next) => {
   // 1. Get the tour
   const tour = await Tour.findById(req.params.tourId);
 
@@ -69,7 +58,7 @@ const createBookingCheckout = async (sessionData) => {
   await Booking.create({ tour, user: userId, price });
 };
 
-export const webhookCheckout = (req, res, next) => {
+exports.webhookCheckout = (req, res, next) => {
   const signature = req.headers['stripe-signature'];
 
   let event;
@@ -90,10 +79,10 @@ export const webhookCheckout = (req, res, next) => {
     createBookingCheckout(event.data.object);
   }
 
-  res.status(200).json({ received: true });
+  res.status(200).json({ received: true});
 };
 
-// export const createBookingCheckout = catchAsync(async (req, res, next) => {
+// exports.createBookingCheckout = catchAsyncErrors(async (req, res, next) => {
 //   const { tour, user, price } = req.query;
 
 //   if (!tour && !user && !price) return next();

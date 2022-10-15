@@ -1,14 +1,8 @@
-import nodemailer from 'nodemailer';
-import pug from 'pug';
-import { htmlToText } from 'html-to-text';
+const nodemailer = require('nodemailer');
+const pug = require('pug');
+const { htmlToText } = require('html-to-text');
 
-export class Email {
-  to: string;
-  firstName: string;
-  lastName: string;
-  url: string;
-  from: string;
-
+module.exports = class Email {
   constructor(user, url) {
     this.to = user.email;
     this.firstName = user.name.split(' ')[0];
@@ -17,7 +11,7 @@ export class Email {
     this.from = `${process.env.EMAIL_FROM}`;
   }
 
-  private getTransport() {
+  getTransport() {
     if (process.env.NODE_ENV === 'production') {
       // Sendgrid
       return nodemailer.createTransport({
@@ -40,7 +34,7 @@ export class Email {
     });
   }
 
-  private async send(template, subject, type?) {
+  async send(template, subject, type) {
     // 1. Render html based on pug
     const html = pug.renderFile(
       `${__dirname}/../views/emails/${template}.pug`,
@@ -79,4 +73,4 @@ export class Email {
   async sendConfirmEmail() {
     await this.send('emailConfirm', 'Confirm your Natours Account');
   }
-}
+};

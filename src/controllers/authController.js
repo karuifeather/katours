@@ -1,11 +1,11 @@
-import crypto from 'crypto';
-import { promisify } from 'util';
-import jwt from 'jsonwebtoken';
+const crypto = require('crypto');
+const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 
-import { User } from '../models/userModel';
-import { catchAsync } from '../utils/catchAsync';
-import { AppError } from '../utils/appError';
-import { Email } from '../utils/email';
+const User = require('./../models/userModel');
+const catchAsyncErrors = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
+const Email = require('./../utils/email');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_PRIVATE, {
@@ -21,8 +21,7 @@ const createSendToken = (user, statusCode, req, res) => {
 
   res.cookie('jwt', token, {
     expires: new Date(
-      Date.now() +
-        Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
@@ -37,7 +36,7 @@ const createSendToken = (user, statusCode, req, res) => {
   });
 };
 
-export const signUp = catchAsync(async (req, res, next) => {
+exports.signUp = catchAsyncErrors(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -64,7 +63,7 @@ export const signUp = catchAsync(async (req, res, next) => {
   createSendToken(newUser, 201, req, res);
 });
 
-export const confirmEmail = catchAsync(async (req, res, next) => {
+exports.confirmEmail = catchAsyncErrors(async (req, res, next) => {
   // 1 Get user based on the token
   const hashedToken = crypto
     .createHash('sha256')
@@ -108,7 +107,7 @@ export const confirmEmail = catchAsync(async (req, res, next) => {
   });
 });
 
-export const logIn = catchAsync(async (req, res, next) => {
+exports.logIn = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
   // 1 If email and password don't exist
@@ -128,7 +127,7 @@ export const logIn = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
-export const protect = catchAsync(async (req, res, next) => {
+exports.protect = catchAsyncErrors(async (req, res, next) => {
   // 1 Get token and check if it exists
   let token;
   if (
@@ -172,7 +171,7 @@ export const protect = catchAsync(async (req, res, next) => {
 });
 
 // ONLY FOR RENDERED PAGES SO NO ERRORS
-export const isLoggedIn = async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
   // Check for token
   if (req.cookies.jwt) {
     try {
@@ -204,7 +203,7 @@ export const isLoggedIn = async (req, res, next) => {
   next();
 };
 
-export const logout = (req, res) => {
+exports.logout = (req, res) => {
   const cookieOptions = {
     expires: new Date(Date.now() + 2 * 1000),
     httpOnly: true,
@@ -217,7 +216,7 @@ export const logout = (req, res) => {
   });
 };
 
-export const restrictTo = (...roles) => {
+exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
@@ -229,7 +228,7 @@ export const restrictTo = (...roles) => {
   };
 };
 
-export const forgotPassword = catchAsync(async (req, res, next) => {
+exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
   if (!req.body.email) {
     return next(new AppError('Please first provide an email address!', 404));
   }
@@ -271,7 +270,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
-export const resetPassword = catchAsync(async (req, res, next) => {
+exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
   // 1 Get user based on the token
   const hashedToken = crypto
     .createHash('sha256')
@@ -298,7 +297,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
-export const updatePassword = catchAsync(async (req, res, next) => {
+exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
   // 1. Get user from collection
   const user = await User.findById(req.user.id).select('+password');
 

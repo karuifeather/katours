@@ -1,4 +1,4 @@
-import { AppError } from '../utils/appError';
+const AppError = require('./../utils/appError');
 
 const handleCastErrorInDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
@@ -13,7 +13,7 @@ const handleDuplicateFieldsInDB = (err) => {
 };
 
 const handleValidationErrorsInDB = (err) => {
-  const errors = Object.values(err.errors).map((curr: any) => curr.message);
+  const errors = Object.values(err.errors).map((curr) => curr.message);
 
   const message = `Invalid input data. ${errors.join('. ')}.`;
 
@@ -83,7 +83,7 @@ const sendErrorProd = (err, req, res) => {
   });
 };
 
-export const globalErrorHandler = (err, req, res, next) => {
+module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

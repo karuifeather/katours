@@ -1,9 +1,9 @@
-import { Tour } from '../models/tourModel';
-import { Booking } from '../models/bookingModel';
-import { catchAsync } from '../utils/catchAsync';
-import { AppError } from '../utils/appError';
+const Tour = require('../models/tourModel');
+const Booking = require('../models/bookingModel');
+const catchAsyncErrors = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-export const alert = (req, res, next) => {
+exports.alert = (req, res, next) => {
   const { alert } = req.query;
 
   if (alert === 'booking') {
@@ -14,7 +14,7 @@ export const alert = (req, res, next) => {
   next();
 };
 
-export const getOverview = catchAsync(async (req, res) => {
+exports.getOverview = catchAsyncErrors(async (req, res) => {
   // 1. Get tour data from collection
   const tours = await Tour.find();
 
@@ -26,7 +26,7 @@ export const getOverview = catchAsync(async (req, res) => {
   });
 });
 
-export const getTour = catchAsync(async (req, res, next) => {
+exports.getTour = catchAsyncErrors(async (req, res, next) => {
   const tour = await Tour.findOne({ slug: req.params.slug }).populate({
     path: 'reviews',
     fields: 'review rating user',
@@ -37,19 +37,18 @@ export const getTour = catchAsync(async (req, res, next) => {
   }
 
   res.status(200).render('tour', {
-    // @ts-ignore
     title: `${tour.name} Tour`,
     tour,
   });
 });
 
-export const getLoginForm = catchAsync(async (req, res) => {
+exports.getLoginForm = catchAsyncErrors(async (req, res) => {
   res.status(200).render('login', {
     title: 'Login to your account',
   });
 });
 
-export const getSignupForm = catchAsync(async (req, res) => {
+exports.getSignupForm = catchAsyncErrors(async (req, res) => {
   let email, name;
   if (req.query.email && req.query.fullname) {
     email = req.query.email;
@@ -66,15 +65,15 @@ export const getSignupForm = catchAsync(async (req, res) => {
   });
 });
 
-export const getAccount = (req, res) => {
+exports.getAccount = (req, res) => {
   res.status(200).render('account', {
     title: 'My Profile',
   });
 };
 
-export const getMyTours = catchAsync(async (req, res, next) => {
+exports.getMyTours = catchAsyncErrors(async (req, res, next) => {
   const bookings = await Booking.find({ user: req.user.id });
-  // @ts-ignore
+
   const tourIds = bookings.map((booking) => booking.tour);
   const tours = await Tour.find({ _id: { $in: tourIds } });
 

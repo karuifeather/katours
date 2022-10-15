@@ -1,9 +1,9 @@
-import mongoose, { Query } from 'mongoose';
-import slugify from 'slugify';
+const mongoose = require('mongoose');
+const slugify = require('slugify');
+// const User = require('./userModel');
+// const validator = require('validator');
 
-import { TourDocument, TourModel } from './types';
-
-const TourSchema = new mongoose.Schema<TourDocument, TourModel>(
+const tourSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -119,7 +119,7 @@ const TourSchema = new mongoose.Schema<TourDocument, TourModel>(
     // guides: Array //for embedding
     guides: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.ObjectId,
         ref: 'User',
       },
     ],
@@ -134,19 +134,19 @@ const TourSchema = new mongoose.Schema<TourDocument, TourModel>(
   }
 );
 
-// TourSchema.index({price: 1})
-TourSchema.index({ price: 1, ratingsAverage: -1 });
-TourSchema.index({ slug: 1 });
-TourSchema.index({
+// tourSchema.index({price: 1})
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({
   startLocation: '2dsphere',
 });
 
-TourSchema.virtual('durationWeeks').get(function () {
+tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
 // Virtual populate
-TourSchema.virtual('reviews', {
+tourSchema.virtual('reviews', {
   ref: 'Review',
   foreignField: 'tour',
   localField: '_id',
@@ -154,43 +154,42 @@ TourSchema.virtual('reviews', {
 
 // Document save middlewares runs before .save() and .create() but not before .insertMany()
 // Runs right before saving into db
-TourSchema.pre('save', function (next) {
+tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   // this points to document object
   next();
 });
 
 // // Additional steps for embedding documents after creating a list of ids in schema
-// TourSchema.pre('save', async function (next) {
+// tourSchema.pre('save', async function (next) {
 //   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
 //   this.gudies = await Promise.all(guidesPromises);
 //   next();
 // });
 
-// TourSchema.pre('save', function(next) {
+// tourSchema.pre('save', function(next) {
 //   true;
 //   next();
 // })
 
 // // Post middleware functions run after the document is saved
 // // thus have access to the doc saved
-// TourSchema.post('save', function(doc, next) {
+// tourSchema.post('save', function(doc, next) {
 //   true;
 // })
 
 // Query middlewares
-TourSchema.pre(
-  /^find/,
-  function (this: Query<TourDocument, TourDocument>, next) {
-    // TourSchema.pre('find', function (next) {
-    // in query middlewares
-    // this points to the query
-    this.find({ secretTour: { $ne: true } });
-    next();
-  }
-);
+tourSchema.pre(/^find/, function (next) {
+  // tourSchema.pre('find', function (next) {
+  // in query middlewares
+  // this points to the query
+  this.find({ secretTour: { $ne: true } });
 
-TourSchema.pre(/^find/, function (next) {
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'guides',
     select: '-__v -passwordChangedAt -slug',
@@ -199,17 +198,19 @@ TourSchema.pre(/^find/, function (next) {
 });
 
 // // Runs after the query is executed
-// TourSchema.post(/^find/, function (docs, next) {
+// tourSchema.post(/^find/, function (docs, next) {
 //   console.log(docs);
 //   console.log(`Query took ${Date.now() - this.start} ms.`);
 //   next();
 // });
 
 // Aggregation middlewares
-// TourSchema.pre('aggregate', function (next) {
+// tourSchema.pre('aggregate', function (next) {
 //   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
 //   // this points to aggregate object
 //   next();
 // });
 
-export const Tour = mongoose.model<TourDocument, TourModel>('Tour', TourSchema);
+const Tour = mongoose.model('Tour', tourSchema);
+
+module.exports = Tour;
