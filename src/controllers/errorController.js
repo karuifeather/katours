@@ -28,6 +28,7 @@ const handleJWTExpiredError = () =>
 
 const sendErrorDev = (err, req, res) => {
   // For API
+  console.error('Error', err);
   if (req.originalUrl.startsWith('/api')) {
     return res.status(err.statusCode).json({
       status: err.status,
@@ -73,8 +74,6 @@ const sendErrorProd = (err, req, res) => {
     });
   }
 
-  // Programming or other unknown error: don't leak error details to clients
-  console.error('Error', err);
   // Sends generic message
   return res.status(err.statusCode).render('error', {
     title: 'Something went wrong!',
