@@ -1,6 +1,9 @@
 {
   "name": "natours",
   "version": "1.0.0",
+  "engines": {
+    "node": "16.x"
+  },
   "description": "MEN from MERN",
   "private": "true",
   "scripts": {
