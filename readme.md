@@ -1,7 +1,7 @@
-# Natours
+# Katours 
 
-![Natours Logo](https://katours.herokuapp.com/img/home/logo-green-1x.png 'Natours')
+Built using Node, Express and MongoDb. 
 
-Built using Node, Express and MongoDb
+## No longer in service
 
-Hosted at [Heroku](https://katours.herokuapp.com/)
+See the upgraded project [featherly](https://github.com/karuifeather/featherly) for more details and updates!
